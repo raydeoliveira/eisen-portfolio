@@ -359,7 +359,8 @@ See the full [Validation Matrix](engineering/validation_matrix.md) and [Engineer
 └── engineering/                       # Standards and processes
     ├── engineering_standards.md        # Code style, anti-patterns, guardrails
     ├── validation_matrix.md           # What to validate and when
-    └── agent_coordination.md          # Multi-persona AI development harness
+    ├── agent_coordination.md          # Multi-persona AI development harness
+    └── capital_event_tracking.md      # Deposit-aware equity tracking design
 ```
 
 > The full production codebase (137 scripts, 128 test modules, 21 skill workflows, 50+ forensics reports) is in a private repository.
