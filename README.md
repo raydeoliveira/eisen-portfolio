@@ -10,15 +10,16 @@
 # EISEN — Multi-Pillar Algorithmic Trading System
 
 A production BTC-USD trading system built on Clean Architecture (Ports & Adapters),
-live on Coinbase since 2025. Multi-strategy portfolio with dynamic regime-conditional
-capital allocation across 3 active pillars.
+live-trading on Coinbase with real capital since March 2026. Multi-strategy portfolio
+with dynamic regime-conditional capital allocation across 3 active pillars executing
+real orders via Coinbase Advanced Trade API.
 
 **This is the public portfolio companion to a private production codebase.**
 Architecture decisions, engineering methodology, and research frameworks are shown here.
 Strategy parameters, signal logic, and backtest results remain private.
 
 Solo-engineered over 18 months. 398 controlled experiments. 277 hypotheses.
-104 documented dead ends. 128 test modules.
+104 documented dead ends. 128 test modules. All 3 pillars execute live market orders.
 
 ---
 
@@ -99,10 +100,16 @@ flowchart LR
     A --> P1 & P5 & P7
 ```
 
-Each pillar is an independent process. One crash doesn't take down the portfolio.
-Capital shifts between pillars based on market regime using CVaR-interpolated
-weights with CHOP index shifting. If a required pillar crashes unrecoverably,
-the entire system halts.
+Each pillar is an independent process executing real Coinbase orders. One crash
+doesn't take down the portfolio. Capital shifts between pillars based on market
+regime using CVaR-interpolated weights with CHOP index shifting. If a required
+pillar crashes unrecoverably, the entire system halts.
+
+All three pillars trade the same Coinbase account simultaneously. Position sizing
+conflicts are prevented by the dynamic allocation orchestrator — each pillar reads
+its allocated capital percentage from `allocation_state.json` and sizes orders
+proportionally. The allocator runs on a separate loop, continuously adjusting
+weights based on regime detection.
 
 Full topology: [architecture/system_design.md](architecture/system_design.md)
 
@@ -259,20 +266,48 @@ These define the domain of the system, not its defects.
 
 ---
 
+## Live Execution
+
+The system runs on a VPS (Windows Server 2025) managed via NSSM services, with
+all three pillars placing real market orders on Coinbase Advanced Trade.
+
+Key production engineering decisions:
+
+- **USDC-denominated pairs**: Live orders use BTC-USDC and PAXG-USDC (user holds
+  USDC, not USD fiat). Ticker/candle data uses BTC-USD for liquidity.
+- **Quote-size BUY orders**: Market BUY orders specify the USD amount to spend
+  (`quote_size`) rather than the asset quantity (`base_size`). This avoids
+  `INVALID_SIZE_PRECISION` errors across products with different decimal
+  requirements and lets Coinbase fill at the best available price.
+- **Historical prewarm**: On restart, the router feeds 500 historical candles
+  through the indicator pipeline (including the predictive top detector and
+  regime shift predictor) so detectors are warm immediately. No 50-hour
+  wait for observation buffers to fill.
+- **Deposit-adjusted equity**: Capital flows (deposits, withdrawals) are tracked
+  as first-class events. PnL is computed against `capital_base = seed + net_flows`,
+  not raw equity.
+
+See [engineering/capital_event_tracking.md](engineering/capital_event_tracking.md)
+for the deposit-tracking design and [engineering/live_execution.md](engineering/live_execution.md)
+for the full live trading architecture.
+
+---
+
 ## Stack
 
 | Component | Technology |
 |-----------|-----------|
 | Language | Python 3.11+ |
 | Exchange | Coinbase Advanced Trade (REST + WebSocket) |
+| Execution | Live market orders (BTC-USDC, PAXG-USDC) |
 | Database | SQLite |
 | Config | Pydantic + JSON presets |
 | Data | 6 APIs, 25 features/cycle |
 | ML | HistGBT triple-barrier classifier |
 | WebSockets | L2 orderbook, strict TLS (certifi) |
 | Backtesting | Walk-forward, Pareto search, PBO detection |
-| Deployment | VPS, NSSM services |
-| Monitoring | Flask dashboard + Discord alerts |
+| Deployment | VPS (Windows Server 2025), NSSM services |
+| Monitoring | Flask dashboard + SSH tunnel |
 | Quality | ruff, mypy, pytest (128 modules) |
 
 ---
@@ -298,7 +333,8 @@ eisen-portfolio/
     ├── engineering_standards.md        # Code style, anti-patterns
     ├── validation_matrix.md           # What to validate and when
     ├── agent_coordination.md          # Multi-persona AI development
-    └── capital_event_tracking.md      # Deposit-aware equity tracking
+    ├── capital_event_tracking.md      # Deposit-aware equity tracking
+    └── live_execution.md             # Live trading architecture
 ```
 
 The full production codebase (137 scripts, 128 test modules, 21 skill workflows,
@@ -308,9 +344,11 @@ The full production codebase (137 scripts, 128 test modules, 21 skill workflows,
 
 ## Performance Context
 
-All figures are from backtested simulations using walk-forward out-of-sample
-validation. Past performance does not guarantee future results. The system
-is structurally long-only and cannot profit during prolonged bear markets.
+The system has been live-trading with real capital on Coinbase since March 2026.
+Figures below are from backtested simulations using walk-forward out-of-sample
+validation prior to live deployment. Past performance does not guarantee future
+results. The system is structurally long-only and cannot profit during prolonged
+bear markets.
 
 ![EISEN Portfolio vs Baselines](docs/eisen_portfolio_benchmark.png)
 
