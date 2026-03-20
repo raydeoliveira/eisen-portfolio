@@ -67,7 +67,9 @@ Allocation shifts are driven by:
 - **CVaR interpolation**: Conditional Value at Risk across regime states
 - **CHOP index shifting**: Choppiness-driven rebalancing
 - **P7 cap**: Whipsaw pillar capped at 60% to prevent concentration risk
-- **Event overrides**: Calendar-gated adjustments for known macro events
+- **Event overrides**: Calendar-gated adjustments for known macro events (FOMC, NFP, CPI, OPEX, etc.)
+- **IDLE event overrides (Alloc.v23)**: 8 macro-event overrides for the IDLE regime, redirecting capital during scheduled volatility windows
+- **Idle-realloc (H308)**: When P7 is dormant for 6+ bars, 65% of its capital redirects to PAXG safe-haven
 
 ## Versioning
 
@@ -77,8 +79,8 @@ The system uses a 4-namespace taxonomy to prevent version ambiguity:
 EISEN S7           ← Full system state (all pillars + allocator)
 ├── P1-Spot.v11    ← Individual pillar config
 ├── P5-PAXG.v1     ← Individual pillar config
-├── P7-Whipsaw.v4  ← Individual pillar config
-├── Alloc.v22      ← Allocator logic version
+├── P7-Whipsaw.v5  ← Individual pillar config
+├── Alloc.v23      ← Allocator logic version
 └── D28            ← Deployment patch (ops only)
 ```
 

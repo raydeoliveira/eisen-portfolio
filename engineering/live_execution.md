@@ -4,7 +4,9 @@
 
 EISEN executes real market orders on Coinbase Advanced Trade via the REST API.
 All 3 pillars (P1 Treasury, P5 PAXG, P7 Whipsaw Recovery) run as independent
-processes on a VPS, trading against the same Coinbase account simultaneously.
+processes on a VPS, executing real market orders against the same Coinbase
+account simultaneously. The system has been live-trading with real capital
+since March 2026.
 
 ## Order Routing
 
@@ -128,13 +130,12 @@ will re-evaluate market conditions and may retry if the signal persists.
 
 ## Fee Model
 
-Coinbase One membership with 25% rebate:
+Coinbase VIP 8 tier:
 
-| Market | Taker (net) | Maker (net) |
-|--------|------------|------------|
-| Spot | 0.015% | 0.000% |
-| Derivatives | 0.0075% | 0.00375% |
+| Market | Taker | Maker |
+|--------|-------|-------|
+| Spot | 0.020% | 0.000% |
 
 All orders are market IOC (immediate-or-cancel), so only taker fees apply.
-The fee model is baked into backtest simulations to ensure forward-test
+The fee model is baked into backtest simulations to ensure live production
 results are comparable.

@@ -18,8 +18,8 @@ real orders via Coinbase Advanced Trade API.
 Architecture decisions, engineering methodology, and research frameworks are shown here.
 Strategy parameters, signal logic, and backtest results remain private.
 
-Solo-engineered over 18 months. 398 controlled experiments. 277 hypotheses.
-104 documented dead ends. 128 test modules. All 3 pillars execute live market orders.
+Solo-engineered over 18 months. 408+ controlled experiments. 281+ hypotheses.
+104+ documented dead ends. 128 test modules. All 3 pillars execute live market orders.
 
 ---
 
@@ -121,7 +121,7 @@ Full topology: [architecture/system_design.md](architecture/system_design.md)
 |-----------|--------|---------|
 | System | `EISEN S{N}` | `EISEN S7` — full multi-pillar + allocator snapshot |
 | Pillar | `P{N}-{Name}.v{M}` | `P1-Spot.v11` — individual pillar config |
-| Allocator | `Alloc.v{M}` | `Alloc.v22` — allocation logic |
+| Allocator | `Alloc.v{M}` | `Alloc.v23` — allocation logic |
 | Deployment | `D{N}` | `D28` — VPS ops patch |
 
 "Compare V10 to V11" is an anti-pattern — always specify scope.
@@ -136,7 +136,7 @@ Most trading systems are built additively. EISEN does the opposite.
 |--------|----------|--------|----------|
 | P1 Treasury | Adaptive spot BTC, predictive hold/exit | Active | V11 champion, Sortino 2.74 |
 | P5 PAXG | Gold-backed crypto, regime diversification | Active | Uncorrelated to BTC drawdowns |
-| P7 Whipsaw | Crash recovery, staged re-entry | Active | Best worst-case Sortino (-0.26) |
+| P7 Whipsaw | Crash recovery, staged re-entry, ADX entry gate | Active | Best worst-case Sortino (-0.26), +96.3 Sortino from ADX gate |
 | P2 Hedge | Futures-hedged spot | Killed | -$183 cumulative, crash-loop instability |
 | P3 Grid | Market-making grid | Killed | -$4,447/4yr, fee drag without maker rebates |
 | P4 Multi-Token | Momentum alt rotation | Killed | -38.85% forward test, 80%+ backtest DD |
@@ -150,7 +150,7 @@ Every elimination is backed by a controlled test ID and P&L evidence.
 
 ## Things That Don't Work
 
-After 398 controlled tests, several counterintuitive results:
+After 408+ controlled tests, several counterintuitive results:
 
 **Static thresholds beat every adaptive mechanism (0/9).** Nine attempts at
 dynamic thresholds — regime-conditional, vol-scaled, EMA-adaptive, ML-predicted —
@@ -182,7 +182,7 @@ parameters.
 
 ### Hypothesis-Driven Development
 
-Every change starts as a numbered hypothesis (H1-H307+):
+Every change starts as a numbered hypothesis (H1-H309+):
 
 ```
 PROPOSED -> ACTIVE -> {VALIDATED | REJECTED | DEAD_END}
@@ -258,7 +258,7 @@ Constraints that cannot be fixed without fundamental architecture changes:
 
 - **Long-only**: Cannot profit in 2022-type bear markets
 - **Max DD floor ~27.55%**: Hard limit without shorting capability
-- **Parameter space deeply explored**: 398+ CTs, diminishing returns
+- **Parameter space deeply explored**: 408+ CTs, diminishing returns
 - **Static threshold ceiling**: 0/9 dynamic variants improved on static
 - **Fee asymmetry kills grid strategies**: Coinbase maker/taker spread
 

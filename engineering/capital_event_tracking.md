@@ -72,6 +72,23 @@ python3.11 scripts/record_capital_event.py list
 python3.11 scripts/record_capital_event.py summary
 ```
 
+## Dynamic Reallocation Events
+
+Beyond user-initiated deposits and withdrawals, the allocator generates
+internal capital reallocation events:
+
+- **Idle-realloc (H308)**: When P7 Whipsaw is dormant (no crash-recovery
+  opportunity) for 6+ bars, 65% of its allocated capital redirects to
+  P5 PAXG as a safe-haven. When P7 re-activates, capital flows back.
+  These internal shifts are tracked as allocation state changes, not as
+  capital events, preserving the invariant that `capital_base` only
+  reflects external flows.
+
+- **IDLE event overrides (H309)**: During scheduled macro events (FOMC,
+  NFP, CPI, OPEX, etc.), the allocator applies regime-specific weight
+  adjustments. 8 event overrides for the IDLE regime shift capital
+  defensively before known volatility windows.
+
 ## Key Invariants
 
 1. **Deposits never inflate PnL**: A $500 deposit increases both equity and capital_base by $500 — PnL is unchanged

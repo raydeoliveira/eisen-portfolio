@@ -92,7 +92,7 @@ This design prevents the common trap of optimizing *around* a useless signal —
 
 ## Dead Parameter Management
 
-Parameters confirmed to have zero gradient are permanently cataloged. 36+ parameters have been declared dead across 398+ controlled tests. Examples of zero-gradient mechanisms:
+Parameters confirmed to have zero gradient are permanently cataloged. 36+ parameters have been declared dead across 408+ controlled tests. Examples of zero-gradient mechanisms:
 
 - Dynamic threshold variants (0/9 success rate)
 - Volatility-target sizing (clips tail gains)
